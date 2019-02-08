@@ -1,7 +1,9 @@
 
 # Lab Contacts
 
-| Professor: Michele Claibourn | Project Manager and R Guru: Charlotte McClintock |
+| Faculty | Project Manager, R Guru |
+|-----|-----|
+| Michele Claibourn | Charlotte McClintock |
 | Email: mclaibourn@virginia.edu | Email: cmcclintock@virginia.edu |
 | Phone: 924-3282 | |
 | Office: Brown SEL (in Clark Hall), i-045 | |
