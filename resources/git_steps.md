@@ -8,7 +8,7 @@
 
 ### First time only
 
-1. In GitHub, fork the repository, https://github.com/datafordemocracy/publicpresidency, to your own github account and go to the forked repository; click on "Clone or Download" and copy the repository URL to the clipboard.
+1. In GitHub, fork the repository, https://github.com/datafordemocracy/PublicInterestData2019, to your own github account and go to the forked repository; click on "Clone or Download" and copy the repository URL to the clipboard.
 
 2. In the terminal, navigate to your local directory (where you want the repository to live)
 
@@ -19,20 +19,20 @@ $ cd "box sync/mpc/datafordemocracy/" # this will be different for you
 3. Clone the repository locally
 
 ```sh
-$ git clone https://github.com/mclaibourn/publicpresidency.git # use your GitHub name/url
+$ git clone https://github.com/mclaibourn/PublicInterestData2019.git # use your GitHub name/url
 ```
 
 4. Navigate to the new repository
 
 ```sh
-$ cd publicpresidency
+$ cd PublicInterestData2019
 ```
 
 5. Tell git about the source repository [(more here)](https://help.github.com/articles/configuring-a-remote-for-a-fork/)
 
 ```sh
 $ git remote -v # initially only your forked repository should be listed
-$ git remote add datademo https://github.com/datafordemocracy/publicpresidency.git # datademo is a name we provided to reference the source repository
+$ git remote add upstream https://github.com/datafordemocracy/PublicInterestData2019.git # upstream is a name we provided to reference the source repository
 $ git remote -v # verify
 ```
 
@@ -46,13 +46,13 @@ Before adding changes from the repository on your local machine to the forked re
 2. Fetch the contents of the source repository, datademo. so you're starting with the most recent version
 
 ```sh
-$ git fetch datademo
+$ git fetch upstream
 ```
 
-3. Merge the changes from datademo/master into your local master branch
+3. Merge the changes from upstream/master into your local master branch
 
 ```sh
-$ git merge datademo/master # this brings your fork's master branch (working directory) in sync with the source repository's master branch)
+$ git merge upstream/master # this brings your fork's master branch (working directory) in sync with the source repository's master branch)
 ```
 
 4. Your local copy of the repository is updated; now update your fork on GitHub
@@ -88,15 +88,13 @@ $ git commit -m "[add commit message]"
 In this method, we'll be using ```git pull``` to sync changes with the remote repository and make use of branch to avoid
 merge conflicts.
 
-Before adding changes from the repository on your local machine to the forked repository on GitHub (the one in your account, [see more here](https://help.github.com/articles/syncing-a-fork/), make sure you're working with the most recent files.
-
 1. Have a branch for development
 ```sh
 $ git branch dev  # This will create a branch called dev
 $ git checkout dev # This will switch to the branch called dev instead of master
 
 ```
-2. Now that you have a branch, edit your files in your branch ( whatever code changes you want to make ) and stage it
+2. Now that you have a branch, edit your files in your branch (whatever code changes you want to make) and stage it
 
 ```sh
 $ git add 'files you edited and you want to include'
@@ -105,13 +103,13 @@ $ git commit -m <insert commit message>
 
 3. Working with pull
 
-Now you have your changes in the local branch called dev. You need to find a way to sync our local repository to
-datademo. Inorder to do this and avoid merge conflicts, you need sync your local master with remote ( datademo )  and merge your changes ( on branch dev )
+Now you have your changes in the local branch called dev. You need to find a way to sync your local repository to
+upstream. In order to do this and avoid merge conflicts, you need sync your local master with remote (upstream)  and merge your changes ( on branch dev )
 on top of it
 
 ```sh
 $ git checkout master # switch to branch master
-$ git pull datademo master # Pull all changes to branch master
+$ git pull upstream master # Pull all changes to branch master
 ```
 At this point, your repository looks something like this:
 
