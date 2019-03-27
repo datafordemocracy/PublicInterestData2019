@@ -1,5 +1,5 @@
 # Public Interest Data Lab
-# Data Cleaning
+# Data Cleaning: Matched data
 # March 2019
 # Contributors: PIDL 2019 Lab
 
@@ -19,6 +19,7 @@ library(googlesheets)
 # read data from encrypted volume and data dictionary
 setwd("/Volumes/PIDL19")
 dss <- read_csv("match_cville_CPS_to_FC.csv")
+# match_cville_CPS_to_FC.csv created in readfile.R
 
 # read data dictionary from google sheets using googlesheets
 # nice explanation: https://datascienceplus.com/how-to-use-googlesheets-to-connect-r-to-google-sheets/
@@ -109,6 +110,41 @@ dss <- dss %>%
   mutate(race = fct_infreq(race),
          race_ethn = fct_infreq(race_ethn))
 
+# impose likely correction to ever_inv
+dss <- dss %>% 
+  mutate(ever_inv2 = case_when(ever_screened == "No" ~ "No", 
+                               ever_screened == "Yes" & (track1 == "INV_" | track2 == "INV_" | track2 == "INV_" |
+                                                   track4 == "INV_" | track5 == "INV_") ~ "Yes", 
+                               TRUE ~ "No"))
+table(dss$ever_inv2)
+
+# change track to match referral_clean
+var <- c("track1", "track2", "track3", "track4", "track5")
+dss <- dss %>% 
+  mutate_at(.vars = vars(var), 
+            .funs = fct_recode,
+            "assess" = "FAS_", "invest" = "INV_")
+
+# change disp to match referral_clean
+var <- c("disp1", "disp2", "disp3", "disp4", "disp5")
+dss <- dss %>% 
+  mutate_at(.vars = vars(var),
+            .funs = fct_recode,
+            "FL1" = "FL1_",
+            "FL2" = "FL2_",
+            "FL3" = "FL3_",
+            "UNF" = "UNF_",
+            "SVC" = "SVC_",
+            "NSV" = "SNO_")
+
+# change safety to match
+var <- c("safety1", "safety2", "safety3", "safety4", "safety5")
+dss <- dss %>% 
+  mutate_at(.vars = vars(var),
+            .funs = fct_recode,
+            "CSF" = "CSF_",
+            "SAF" = "SAF_",
+            "USF" = "USF_")
 
 # ..........................................................................................
 
@@ -137,8 +173,8 @@ dss <- dss %>%
 # all the yes, no
 var <- c("fc_enter", "prior_enter", "child_mr", "child_hearing", 
          "child_physdis", "child_disturbed", "child_othermed", 
-         "child_physabuse", "child_sexabuse", "child_neglect", 
-         "parent_alc", "parent_drug", "remove_alc", "remove_drug", 
+         "remove_physabuse", "remove_sexabuse", "remove_neglect", 
+         "remove_parent_alc", "remove_parent_drug", "remove_alc", "remove_drug", 
          "remove_disable", "remove_behave", "remove_death", 
          "remove_jail", "remove_cope", "remove_abandon",
          "remove_relinq", "remove_house", "foster_help", "get_adopt",
@@ -206,5 +242,3 @@ saveRDS(dss, file = "dss.rds")
 rm(cols, i, var, gs_datadic)
 save.image("dss_clean.RData")
 # load("dss_clean.RData") # to load
-
-
