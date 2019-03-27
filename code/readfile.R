@@ -19,7 +19,7 @@ setwd("/Volumes/PIDL19")
 # ..........................................................................................
 
 # read initial file, save as csv ----
-wb <- loadWorkbook("initialfiles/Match Cville CPS to FC.xlsx", password="WaHoWa2152019")
+wb <- loadWorkbook("initialfiles/Match Cville CPS to FC.xlsx", password="")
 ws <- readWorksheet(wb, "Match Cville CPS to FC 2015-201")
 
 str(ws)
@@ -32,7 +32,7 @@ write_csv(ws, "match_cville_CPS_to_FC.csv")
 # ..........................................................................................
 
 # read placement history file, save as csv ----
-wb2 <- loadWorkbook("initialfiles/Match feb14_PlcData Mar14.xls", password="WaHoWa")
+wb2 <- loadWorkbook("initialfiles/Match feb14_PlcData Mar14.xls", password="")
 ws2 <- readWorksheet(wb2, "Match feb14pm with key_detailed")
 
 str(ws2)
@@ -45,7 +45,7 @@ write_csv(ws2, "placement.csv")
 # ..........................................................................................
 
 # read full referral file, save as csv ----
-wb3 <- loadWorkbook("initialfiles/Match feb14pm_Add all referrals_De-identified.xlsx", password="WaHoWa")
+wb3 <- loadWorkbook("initialfiles/Match feb14pm_Add all referrals_De-identified.xlsx", password="")
 ws3 <- readWorksheet(wb3, "Match feb14pm_Add all referrals")
 
 str(ws3)
