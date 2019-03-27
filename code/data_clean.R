@@ -25,7 +25,7 @@ dss <- read_csv("match_cville_CPS_to_FC.csv")
 # nice explanation: https://datascienceplus.com/how-to-use-googlesheets-to-connect-r-to-google-sheets/
 # gs_auth(new_user = TRUE) # need to run initially to give R access to your google drive
 gs_datadic <- gs_title("pidl2019_data_dictionary")
-datadic <- gs_read(gs_datadic, skip = 8)
+datadic <- gs_read(gs_datadic, ws = "codebook", skip = 8, n_max = 131)
 
 dss_copy <- dss # keep a copy of original
 # dss <- dss_copy # restore and start again
@@ -124,6 +124,20 @@ dss <- dss %>%
   mutate_at(.vars = vars(var), 
             .funs = fct_recode,
             "assess" = "FAS_", "invest" = "INV_")
+
+# impose likely correction track1-track5
+# probably a more elegant way to do this, but I 
+dss <- dss %>% 
+  mutate(track1_2 = if_else(screen1 == as.character("No"), "none", as.character(track1)),
+         track1_2 = as.factor(track1_2),
+         track2_2 = if_else(screen2 == as.character("No"), "none", as.character(track2)),
+         track2_2 = as.factor(track2_2),
+         track3_2 = if_else(screen3 == as.character("No"), "none", as.character(track3)),
+         track3_2 = as.factor(track3_2),
+         track4_2 = if_else(screen4 == as.character("No"), "none", as.character(track4)),
+         track4_2 = as.factor(track4_2),
+         track5_2 = if_else(screen5 == as.character("No"), "none", as.character(track5)),
+         track5_2 = as.factor(track5_2)) 
 
 # change disp to match referral_clean
 var <- c("disp1", "disp2", "disp3", "disp4", "disp5")

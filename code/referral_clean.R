@@ -176,6 +176,3 @@ table(ref$track2)
 #   this is the file to call for subsequent work (analysis, visualization)
 saveRDS(ref, file = "referral.rds")
 # readRDS("referral.rds") # to load
-
-
-
