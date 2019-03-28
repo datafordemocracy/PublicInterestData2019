@@ -23,7 +23,7 @@ ref <- readRDS("ref_long.rds")
 # read data dictionary from google sheets using googlesheets
 # gs_auth(new_user = TRUE) # need to run initially to give R access to your google drive
 gs_datadic <- gs_title("pidl2019_data_dictionary")
-datadic <- gs_read(gs_datadic, ws = "referral_full", skip = 8)
+datadic <- gs_read(gs_datadic, ws = "referral_full", skip = 8, n_max = 51)
 
 ref_copy <- ref # keep a copy of original
 # ref <- ref_copy # restore and start again
@@ -161,7 +161,7 @@ ref <- ref %>%
 
 # impose likely correction to track
 ref <- ref %>% 
-  mutate(track2 = case_when(screen_out == "Yes" ~ "None",
+  mutate(track2 = case_when(screen_out == "Yes" ~ "none",
                             screen_out == "No" & track == "invest" ~ "invest",
                             screen_out == "No" & track == "assess" ~ "assess"))
 table(ref$track2)
