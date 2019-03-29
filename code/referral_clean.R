@@ -23,7 +23,7 @@ ref <- readRDS("ref_long.rds")
 # read data dictionary from google sheets using googlesheets
 # gs_auth(new_user = TRUE) # need to run initially to give R access to your google drive
 gs_datadic <- gs_title("pidl2019_data_dictionary")
-datadic <- gs_read(gs_datadic, ws = "referral_full", skip = 8, n_max = 51)
+datadic <- gs_read(gs_datadic, ws = "referral_full", skip = 8, n_max = 46)
 
 ref_copy <- ref # keep a copy of original
 # ref <- ref_copy # restore and start again
@@ -33,7 +33,7 @@ ref_copy <- ref # keep a copy of original
 
 # rename the variables ----
 # from Ana, Stuart, and Rishabh
-for (i in (1:50)){
+for (i in (1:46)){
   colnames(ref)[i] <- datadic$RENAME[i]
 }
 names(ref)
@@ -44,17 +44,17 @@ names(ref)
 # reformatting the CPS variables ----
 
 # to convert to factors
-var <- c("gender", "race", "hispanic", "race_ethn", "race2", "gender2", 
-         "race_ethn2", "hispanic2", "prior_risk", "region", "locality", 
-         "track", "resp_priority", "disp", "safety", "screen_out", "screen_in",
-         "invalid_an", "med_neg", "ment_ab", "phys_ab", "phys_neg", "sex_ab",
-         "substance_ex", "ab_gender", "ab_race", "response_timely", 
-         "response_vic_timely", "prior_ref")
+var <- c("gender", "race", "hispanic", "race_ethn", "race2", "race_ethn2", 
+         "prior_risk", "region", "locality", "track", "resp_priority", 
+         "disp", "safety", "screen_out", "screen_in", "invalid_an", 
+         "med_neg", "ment_ab", "phys_ab", "phys_neg", "sex_ab", "substance_ex", 
+         "ab_gender", "ab_race", "response_timely", "response_vic_timely", 
+         "prior_ref")
 ref <- ref %>% 
   mutate_at(var, as.factor)
 
 # to convert to integers
-var <- c("cid", "numref", "refnum", "ref_id", "ref_yr", "ref_cl_id", "age", "ab_cl_id", "ab_age", "numref2")
+var <- c("cid", "refnum", "ref_id", "ref_yr", "ref_cl_id", "age", "ab_cl_id", "ab_age", "numref2")
 ref <- ref %>% 
   mutate_at(var, as.integer)
 
@@ -82,14 +82,10 @@ ref <- ref %>%
   mutate(race_ethn = fct_recode(race_ethn, "Asian" = "AsianN",
                                 "MultiRace" = "Multi-Race"),
          race = fct_recode(race, "MultiRace" = "Multi-Race"),
-         race2 = fct_recode(race2, "MultiRace" = "Multi-Race"),
          race_ethn2 = fct_recode(race_ethn2, "MultiRace" = "Multi-Race"),
          hispanic = fct_recode(hispanic, "Hispanic" = "Y",
                                "Non-Hispanic" = "N",
                                "Unknown" = "U"),
-         hispanic2 = fct_recode(hispanic, "Hispanic" = "Y",
-                                "Non-Hispanic" = "N",
-                                "Unknown" = "U"),
          ab_race = fct_recode(ab_race,"MultiRace" = "Multi-Race",
                               "Unknown" = "Declined", 
                               "NHPI" = "Native Hawaiian/Pacific Islander"))
