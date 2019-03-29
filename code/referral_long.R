@@ -56,6 +56,22 @@ reflong <- reflong %>%
 
 sum(reflong$numref == reflong$NbrRefs) # yes
 
+# appears to be some duplicates, let's check it out
+identical(reflong[['DOB']],reflong[['VictimBirthDate']]) # identical
+identical(reflong[['Race']],reflong[['RaceShort_Victim']]) # not identical
+identical(reflong[['Gender']],reflong[['VictimGender']]) # identical
+identical(reflong[['Hispanic']],reflong[['HISPANIC_SW']]) # not identical # no diff found?
+identical(reflong[['Race_Ethnicity']],reflong[['VictimPrimaryEthnicity']]) # not identical
+identical(reflong[['numref']],reflong[['NbsRefs']]) # not identical # no diff found?
+
+# no differences found?
+which(!reflong$Hispanic==reflong$HISPANIC_SW) # not different
+which(!reflong$numref==reflong$NbrRefs) # not different
+which(!reflong$Race_Ethnicity==reflong$VictimPrimaryEthnicity) # different
+
+# drop duplicate and unnecessary variables
+reflong <- select(reflong, -c(VictimBirthDate, VictimGender, HISPANIC_SW, NbrRefs))
+
 # save file for cleaning and analysis
 saveRDS(reflong, file = "ref_long.rds")
 # readRDS("ref_long.rds") # to load
