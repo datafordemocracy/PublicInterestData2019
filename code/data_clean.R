@@ -52,7 +52,7 @@ var <- c("gender", "race", "hispanic", "race_ethn", "screen1", "screen2",
          "screen3", "screen4", "screen5", "ever_screened", "track1", 
          "track2", "track3", "track4", "track5", "ever_inv", "disp1", 
          "disp2", "disp3", "disp4", "disp5", "safety1", "safety2", 
-         "safety3", "safety4", "safety5", "ever_unsafe")
+         "safety3", "safety4", "safety5", "ever_unsafe", "ever_find")
 dss <- dss %>% 
   mutate_at(var, as.factor)
 
@@ -66,7 +66,7 @@ dss <- dss %>%
 var <- c("cid", "numref", "ref_id1", "ref_id2", "ref_id3", "ref_id4", 
          "ref_id5", "ref_cl_id1", "ref_cl_id2", "ref_cl_id3", "ref_cl_id4", 
          "ref_cl_id5", "ref_yr1", "ref_yr2", "ref_yr3", "ref_yr4", "ref_yr5", 
-         "ref_m1", "ref_m2", "ref_m3", "ref_m4", "ref_m5", "ever_find")
+         "ref_m1", "ref_m2", "ref_m3", "ref_m4", "ref_m5")
 dss <- dss %>% 
   mutate_at(var, as.integer)
 
@@ -90,7 +90,8 @@ dss <- dss %>%
 # race, ethnicity
 dss <- dss %>% 
   mutate(race_ethn = fct_recode(race_ethn, "Asian" = "AsianN",
-                                "Multi-Race" = "MultiRace"),
+                                "MultiRace" = "Multi-Race"),
+         race = fct_recode(race, "MultiRace" = "Multi-Race"),
          hispanic = fct_recode(hispanic, "Hispanic" = "Y",
                                "Non-Hispanic" = "N",
                                "Unknown" = "U"))
@@ -104,11 +105,10 @@ dss <- dss %>%
             .funs = fct_recode,
             "Yes" = "1", "No" = "0")
 
-# re-order factor levels 
-# by frequency
+# re-order factor levels (by hand): race, race_ethn
 dss <- dss %>% 
-  mutate(race = fct_infreq(race),
-         race_ethn = fct_infreq(race_ethn))
+  mutate(race = fct_relevel(race, "White", "Black", "MultiRace"),
+         race_ethn = fct_relevel(race_ethn, "White", "Black", "MultiRace"))
 
 # impose likely correction to ever_inv
 dss <- dss %>% 
@@ -151,14 +151,21 @@ dss <- dss %>%
             "SVC" = "SVC_",
             "NSV" = "SNO_")
 
-# change safety to match
+# change safety to match (and make ordered)
 var <- c("safety1", "safety2", "safety3", "safety4", "safety5")
 dss <- dss %>% 
   mutate_at(.vars = vars(var),
             .funs = fct_recode,
             "CSF" = "CSF_",
             "SAF" = "SAF_",
-            "USF" = "USF_")
+            "USF" = "USF_") %>% 
+  mutate_at(var, list(~ ordered(., levels = c("SAF", "CSF", "USF"))))
+
+# make ever_find ordered (and relabel)
+dss <- dss %>% 
+  mutate(ever_find = fct_recode(ever_find, "No Find" = "0", "Find-Low" = "3", "Find-Mod" = "2", "Find-High" = "1")) %>% 
+  mutate(ever_find = ordered(ever_find, levels = c("No Find", "Find-Low", "Find-Mod", "Find-High")))
+
 
 # ..........................................................................................
 
