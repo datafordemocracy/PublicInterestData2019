@@ -20,7 +20,7 @@ load("dss_clean.RData")
 # Reshape placement history data
 
 # read in the data
-ph <- read_csv("placement.csv")
+ph <- read_csv("dss-s19-refs.csv")
 
 # check variable names for this df and for the original
 names(ph)[1:131]
