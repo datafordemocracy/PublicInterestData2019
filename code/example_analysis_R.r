@@ -32,7 +32,7 @@ dss <- readRDS("dss.rds")
 # children in foster care; only whte, black, multirace; only removal variables and race
 dss_remove <- dss %>% 
   filter(fc_enter == "Yes") %>% 
-  filter(race %in% c("White", "Black", "MultiRace")) %>% 
+  filter(race %in% c("White", "Black", "Multi-Race")) %>% 
   dplyr::select(race, remove_physabuse:remove_house)
 
 # drop unused race levels, and recode reasons
@@ -91,7 +91,7 @@ fisher.test(dss_remove$remove_neglect, dss_remove$race)
 # re-create subsetted data frame for analysis (but keep all vars), recode age
 dss_remove <- dss %>% 
   filter(fc_enter == "Yes") %>% 
-  filter(race %in% c("White", "Black", "MultiRace")) %>% 
+  filter(race %in% c("White", "Black", "Multi-Race")) %>% 
   mutate(age_rem = interval(start = dob, end = remove_currdate) /
            duration(num = 1, units = "years"))
 
@@ -229,7 +229,7 @@ summary(dur2)
 plot(survfit(dur1), xlab="Weeks", ylab="Cases Active")
 race_treat <- with(dss_remove,
                     data.frame(
-                      race = c("White", "Black", "MultiRace"),
+                      race = c("White", "Black", "Multi-Race"),
                       gender = c("Male", "Male", "Male"),
                       age_rem = c(7,7,7))
                    )
