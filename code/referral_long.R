@@ -19,6 +19,11 @@ dss_safety <- dss %>%
   select(CounterID, SafetyDecision.1:SafetyDecision.5)
 
 ref <- left_join(ref, dss_safety) # join
+ref <- ref %>% select(-c(AbuserClientID.1:AbuserPrimaryEthnicity.26)) # remove uinintended ariables
+
+cols <- c(197:248,660:685, 738:763) # REFER_DT, Referral_Month_Year, FirstContractDateTime, FirstVictimContactDateTime
+ref[,cols] <- lapply(ref[cols], as.character) # save dates as character for later reformatting
+
 ref <- ref %>% select(CounterID, FIPS, DOB, Gender, Race, Hispanic, # reorder
                       Race_Ethnicity, RaceShort_Victim:OverallDisposition.26, 
                       SafetyDecision.1:SafetyDecision.5, 
@@ -42,8 +47,7 @@ reflong <- reflong %>%
          OverallDisposition, SafetyDecision, SCRN_OUT_REFER_SW, ACPT_REFER_SW, 
          VictimAgeAtReferral, VicAgeTrunc, InvalidAN, MedicalNeglect, 
          MentalAbuseNeglect, PhysicalAbuse, PhysicalNeglect, SexualAbuse, 
-         SubstanceExposedInfants, AbuserClientID, AbuserBirthDate, 
-         AbuserAgeAtReferral, AbuserGender, AbuserPrimaryEthnicity, 
+         SubstanceExposedInfants, 
          FirstContactDateTime, ResponseTimedays, ResponseTimeTimely, 
          FirstVictimContactDateTime, VictimResponseTimedays, 
          VictimResponseTimeTimely, PriorReferralExistsWithinYear)
