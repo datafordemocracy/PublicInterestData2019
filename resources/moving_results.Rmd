@@ -1,0 +1,159 @@
+---
+title: "Finalizing Results & Moving to Report"
+author: "Public Interest Data Lab"
+date: "Spring 2019"
+output: 
+  html_document:
+    toc: true
+    theme: yeti
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("/Volumes/PIDL19")
+
+library(tidyverse)
+library(stargazer)
+library(RColorBrewer)
+library(lubridate)
+
+
+dss <- readRDS("dss.rds")
+```
+
+
+# Figures
+
+First, some code to create a visualization.
+
+```{r}
+# from the example_analysis_R.r script!
+# Create a data frame to generate a graph ----
+# subset data 
+# children in foster care; only whte, black, multirace; only removal variables and race
+dss_remove <- dss %>% 
+  filter(fc_enter == "Yes") %>% 
+  filter(race %in% c("White", "Black", "MultiRace")) %>% 
+  dplyr::select(race, remove_physabuse:remove_house)
+
+# drop unused race levels, and recode reasons
+dss_remove$race <- droplevels(dss_remove$race)
+var <- c(names(dss)[100:114])
+dss_remove <- dss_remove %>% 
+  mutate_at(var, as.numeric) %>% 
+  mutate_at(var, list(~ dplyr::recode(., `1` = 0L, `2` = 1L)))
+
+# reshape to long
+remove <- dss_remove %>% 
+  gather(reason, count, -race) %>% 
+  group_by(race, reason) %>% 
+  summarize(tot = sum(count))
+
+# add total number of children in each racial category to data frame
+remove_race <- dss_remove %>% count(race)
+remove <- left_join(remove, remove_race, by = "race")
+remove <- remove %>% 
+  mutate(prop = tot/n)
+
+# make reason a factor and order by prop
+remove <- remove %>% 
+  mutate(reason = factor(reason),
+         reason = fct_reorder(reason, prop))
+
+# Generate a figure of reasons ---
+ggplot(remove, aes(x = reason, y = prop, fill = race)) + 
+  geom_col(width=0.9, position=position_dodge(.75)) +
+  scale_fill_manual(values = brewer.pal(9, "Oranges")[c(8,6,4)]) +
+  coord_flip() +
+  labs(title = "Reasons for Removal from Home By Race",
+       subtitle = "CPS Removals from January 2, 2015 to December 29, 2017", 
+       y = "Proportion of Children Removed for Reason", x = "Reason for Removal")
+```
+
+## Steps to Export Visualizations in R
+1. Run the code for the visualization the the console (the plot should appear under the plots tab in the lower right quadrant of the screen).
+2. Click Export > Save as PDF (*PDF images have the best resolution when embedded in the report*). Give the plot a descriptive name (like "all-removals-prop"), and same the image. 
+3. Resize the image to reasonable dimensions. You can either resize the image dimensions by resizing the plot viewer (dragging the sides) or in the export step. Make sure PDF size is set to `(Device Size)` so that it maintains the dimensions of the viewer, or change the width and height dimensions in export.
+
+## Steps to Get a Visualizations into Overleaf
+
+1. Open the Overleaf project and click the upload button in the top left corner (the third icon below the Menu button). Upload the PDF(s) and drag them into the `plots` folder. (*If you click the plots folder before uploading, they will automatically be in the plots folder.*)
+2. Now go to the Example Section of the Overleaf doc. See you there!
+
+# Tables 
+
+To make LaTeX tables, we'll be using the `stargazer` package.
+
+First some code from `example_analysis_R.r` to create some example models.
+
+```{r}
+# from example_analysis_R.r
+# Generate a model for a reason ----
+# re-create subsetted data frame for analysis (but keep all vars), recode age
+dss_remove <- dss %>% 
+  filter(fc_enter == "Yes") %>% 
+  filter(race %in% c("White", "Black", "MultiRace")) %>% 
+  mutate(age_rem = interval(start = dob, end = remove_currdate) /
+           duration(num = 1, units = "years"))
+
+# 1. most basic model: race, age, gender
+house1 <- glm(remove_house ~ race + age_rem + gender, 
+              data = dss_remove, family = "binomial")
+
+# 2. adding polynomial for age
+house2 <- glm(remove_house ~ race + poly(age_rem, 2) + gender, 
+              data = dss_remove, family = "binomial")
+
+# 3. adding family structure (reduced to single/two parents)
+dss_remove <- dss_remove %>% 
+  mutate(care_structure2 = fct_recode(care_structure,
+                                      "Single" = "Single mom",
+                                      "Single" = "Single dad",
+                                      "Dual" = "Married couple",
+                                      "Dual" = "Unmarried couple"))
+house3 <- glm(remove_house ~ race + age_rem + gender + care_structure2, 
+              data = dss_remove, family = "binomial")
+
+# 4. adding numref
+house4 <- glm(remove_house ~ race + age_rem + gender + care_structure2 + numref, 
+              data = dss_remove, family = "binomial")
+
+# 5. adding ever_find
+house5 <- glm(remove_house ~ race + age_rem + gender + care_structure2 + numref + ever_find, 
+              data = dss_remove, family = "binomial")
+```
+
+Now to making LaTeX tables!
+
+Use the `stargazer` function to get a LaTeX table from your model. Copy and paste the output from begin{table} to end{table} into Overleaf. Meet you there!
+
+
+```{r}
+# run install.packages("stargazer") if you haven't yet
+library(stargazer)
+stargazer(house1, house2, house3, house4, house5, 
+          title="Comparing Logit Regression of Removal Due to Inadequare Housing", 
+          covariate.labels=c("Black", "Multiracial", "Age at Removal", 
+                             "Polynomial of Age at Removal: 1", 
+                             "Polynomial of Age at Removal: 2", "Male", 
+                             "Care Structure: Single", "Number of Referrals",
+                             "Ever Find L", "Ever Find Q", "Ever Find C"), 
+                    type = "latex", star.cutoffs = c(0.25, 0.1, 0.05),
+          column.sep.width="1pt", align=TRUE, no.space=TRUE, dep.var.labels.include=FALSE)
+# check out ?stargazer to see all the possible arguments
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
