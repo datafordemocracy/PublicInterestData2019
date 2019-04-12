@@ -67,7 +67,7 @@ remove <- remove %>%
 # Generate a figure of reasons ---
 ggplot(remove, aes(x = reason, y = prop, fill = race)) + 
   geom_col(width=0.9, position=position_dodge(.75)) +
-  scale_fill_manual(values = brewer.pal(9, "Blues")[c(8,6,4)]) +
+  scale_fill_manual(values = brewer.pal(9, "Oranges")[c(8,6,4)]) +
   coord_flip() +
   labs(title = "Reasons for Removal from Home", subtite = "By Race", 
        y = "Proportion of Children Removed for Reason", x = "Reason for Removal")
