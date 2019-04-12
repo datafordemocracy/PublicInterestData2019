@@ -23,7 +23,7 @@ ref <- readRDS("ref_long.rds")
 # read data dictionary from google sheets using googlesheets
 # gs_auth(new_user = TRUE) # need to run initially to give R access to your google drive
 gs_datadic <- gs_title("pidl2019_data_dictionary")
-datadic <- gs_read(gs_datadic, ws = "referral_full", skip = 8, n_max = 46)
+datadic <- gs_read(gs_datadic, ws = "referral_full", skip = 8, n_max = 41)
 
 ref_copy <- ref # keep a copy of original
 # ref <- ref_copy # restore and start again
@@ -33,7 +33,7 @@ ref_copy <- ref # keep a copy of original
 
 # rename the variables ----
 # from Ana, Stuart, and Rishabh
-for (i in (1:46)){
+for (i in (1:41)){
   colnames(ref)[i] <- datadic$RENAME[i]
 }
 names(ref)
@@ -48,13 +48,13 @@ var <- c("gender", "race", "hispanic", "race_ethn", "race2", "race_ethn2",
          "prior_risk", "region", "locality", "track", "resp_priority", 
          "disp", "safety", "screen_out", "screen_in", "invalid_an", 
          "med_neg", "ment_ab", "phys_ab", "phys_neg", "sex_ab", "substance_ex", 
-         "ab_gender", "ab_race", "response_timely", "response_vic_timely", 
+         "response_timely", "response_vic_timely", 
          "prior_ref")
 ref <- ref %>% 
   mutate_at(var, as.factor)
 
 # to convert to integers
-var <- c("cid", "refnum", "ref_id", "ref_yr", "ref_cl_id", "age", "ab_cl_id", "ab_age", "numref2")
+var <- c("cid", "refnum", "ref_id", "ref_yr", "ref_cl_id", "age", "numref2")
 ref <- ref %>% 
   mutate_at(var, as.integer)
 
@@ -68,9 +68,13 @@ var <- c("age_full", "response_days", "response_vic_days")
 ref <- ref %>% 
   mutate_at(var, as.numeric)
 
-# what's left? 
-# tricky date: ref_dt, ref_m, ab_dob, first_contact, first_vic_contact
-# dates <- ref %>% select(cid, dob, dob2, ref_yr, ref_dt, ref_m, age_full, age, ab_dob, ab_age, first_contact, response_days, first_vic_contact, response_vic_days)
+# to convert to dates
+ref <- ref %>% 
+  mutate(ref_dt = as.Date(ref_dt),
+         ref_m = as.Date(ref_m),
+         first_contact = as.Date(first_contact),
+         first_vic_contact = as.Date(first_vic_contact))
+
 
 # ..........................................................................................
 
@@ -85,10 +89,7 @@ ref <- ref %>%
          race_ethn2 = fct_recode(race_ethn2, "MultiRace" = "Multi-Race"),
          hispanic = fct_recode(hispanic, "Hispanic" = "Y",
                                "Non-Hispanic" = "N",
-                               "Unknown" = "U"),
-         ab_race = fct_recode(ab_race,"MultiRace" = "Multi-Race",
-                              "Unknown" = "Declined", 
-                              "NHPI" = "Native Hawaiian/Pacific Islander"))
+                               "Unknown" = "U"))
 
 # all the yes, no (except timely)
 var <- c("screen_out", "screen_in", "invalid_an", "med_neg", "ment_ab",
@@ -161,8 +162,6 @@ ref <- ref %>%
                             screen_out == "No" & track == "invest" ~ "invest",
                             screen_out == "No" & track == "assess" ~ "assess"))
 table(ref$track2)
-
-# what's left?
 
 
 # ..........................................................................................
