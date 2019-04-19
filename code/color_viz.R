@@ -22,10 +22,10 @@ dss <- readRDS("dss.rds")
 #.......................................................................................
 
 # order of levels for race factor
-# White, Black, MultiRace, Asian, Hispanic, Other
+# White, Black, MultiRace, Hispanic, Asian
 
 # set palettes
-colorviz6 <- c("#384c7d","#755391","#b25590","#e35d7c","#fe785b")
+colorviz5 <- c("#384c7d","#755391","#b25590","#e35d7c","#fe785b")
 colorviz3 <- c("#b25590","#e35d7c","#fe785b")
 
 # Model from Brago, Conor, and Hannah
@@ -89,7 +89,7 @@ p <- ggplot(subset(pred_count, !group=="Unknown"),
        x="Race",
        y="Number of Referrals",
        caption = "Note: error bars are 90% credible intervals") +
-  scale_color_manual(values=colorviz6) # set colors
+  scale_color_manual(values=colorviz5) # set colors
 p
 
 # Notes: 
