@@ -24,7 +24,6 @@ Models:
     * significant effects for black, multirace (more referrals) and hispanic (less referrals)
   
 ## Janie, Alex, Carolynn
-focused on removal reasons
 
 Overview: 
   * focused on removal reasons and financial support
