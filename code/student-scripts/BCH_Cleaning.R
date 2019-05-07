@@ -40,3 +40,4 @@ dss <- dss %>%
 dss2$race <- droplevels(dss2$race)
 
 save.image("BCH_clean.RData")
+

@@ -29,7 +29,7 @@ tot <- (foster %>% group_by(race) %>% count())$n
 # white = 42, black = 91, multiracial = 45
 
 ## general disability (any diagnosis)
-general <- foster %>% group_by(race) %>% count(child_disabled)
+general <- foster %>% dplyr::group_by(race, child_disabled) %>% dplyr::count()
 gen_diag <- filter(general, child_disabled=='Yes')$n # number of children diagnosed with any disability
 gen_prop <- round(gen_diag/tot, 3) # proportion of children diagnosed with any disability (by race)
 
@@ -38,7 +38,7 @@ chisq.test(cbind(gen_diag, (tot-gen_diag)), correct=FALSE)
 genp <- chisq.test(cbind(gen_diag, (tot-gen_diag)), correct=FALSE)$p.value # get p value
 
 ## emotional disturbance
-emotional <- foster %>% group_by(race) %>% count(child_disturbed)
+emotional <- foster %>% dplyr::group_by(race, child_disturbed) %>% dplyr::count()
 em_diag <- filter(emotional, child_disturbed=='Yes')$n # number of children diagnosed with emotional disturbance
 em_prop <- round(em_diag/tot, 3) # proportion of children diagnosed with emotional disturbance (by race)
 
@@ -47,7 +47,7 @@ chisq.test(cbind(em_diag, (tot-em_diag)), correct=FALSE)
 emp <- chisq.test(cbind(em_diag, (tot-em_diag)), correct=FALSE)$p.value
 
 ## medical diagnosis
-medical <- foster %>% group_by(race) %>% count(child_othermed)
+medical <- foster %>% dplyr::group_by(race, child_othermed) %>% dplyr::count()
 med_diag <- filter(medical, child_othermed=='Yes')$n # number of children diagnosed with medical disability
 med_prop <- round(med_diag/tot, 3) # proportion of children diagnosed with intellectual disability (by race)
 
@@ -142,7 +142,7 @@ ggplot(dis_long, aes(x=distype, y=prop, fill=race, alpha=distype)) +
 ###### discharge reason ###### 
 
 ### descriptives
-rsn_race <- foster %>% group_by(race, discharge_reason) %>% count() # count of discharge reasons by race
+rsn_race <- foster %>% dplyr::group_by(race, discharge_reason) %>% dplyr::count() # count of discharge reasons by race
 discharged <- foster %>% 
   filter(discharge_reason != 'Still in Care') %>% # remove children who haven't been discharged
   filter(discharge_reason != 'Custody Transfer (Agency)') %>% # remove child who was transferred to another agency

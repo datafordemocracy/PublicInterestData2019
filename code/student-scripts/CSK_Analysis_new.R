@@ -90,7 +90,7 @@ dis5 <- multinom(discharge_reason ~ race +
                    child_disabled +
                    remove_neglect +
                    remove_house,
-                 data=discharged)
+                 data=discharged) 
 
 summary(dis5)
 Anova(dis5, type=3)

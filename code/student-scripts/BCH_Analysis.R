@@ -12,6 +12,11 @@ library(stargazer)
 setwd("/Volumes/PIDL19")
 load("BCH_clean.RData")
 
+# set color palette
+colorviz3 <- c("#b25590","#e35d7c","#fe785b")
+colorviz5 <- c("#384c7d","#755391","#b25590","#e35d7c","#fe785b")
+
+
 #MODEL: Ever screened in
 screen1 <- glm(ever_screened ~ race_ethn + gender + agemiss + age2,
                data=dss, na.action=na.omit, family=binomial(link="logit"))
@@ -105,26 +110,26 @@ find_ologit3.coef
 # Generating predicted values from the "find_ologit3" model
 # NOTE: I couldn't figure out a way to make this work. I think something about the intercepts from the polr
 # model were making R mad. I'll leave this one to the experts.
-'
-find_ologit3_pred <- predicts(find_ologit3, "F;F(2);0;8;0;0;0;0;0;2", sim.count = 1000, conf.int = 0.90, set.seed = 2238)
-find_ologit3_pred
-# NOTE: predicted probabilities include the three categories of race considered in this analysis (White, Black,
-# and multiracial, male, age not missing, age 8, no forms of mental abuse, physical abuse or neglect, sexual 
-# abuse, or substance abuse, 2 referrals)
 
-# Plotting predicted values
-find_ologit3_plot <- ggplot(find_ologit3_pred, aes(x = race, y = mean, color=race)) +
-geom_point(size=4) +
-geom_pointrange(aes(ymin = lower, ymax=upper)) +
-coord_flip() +
-labs(title="Probability of Having a Finding by Race",
-x="Race",
-y="Probability",
-color= "Race",
-caption = "Note: error bars are 90% confidence intervals") +
-scale_color_manual(values=colorviz3)
-find_ologit3_plot
-'
+# find_ologit3_pred <- predicts(find_ologit3, "F;F(2);0;8;0;0;0;0;0;2", sim.count = 1000, conf.int = 0.90, set.seed = 2238)
+# find_ologit3_pred
+# # NOTE: predicted probabilities include the three categories of race considered in this analysis (White, Black,
+# # and multiracial, male, age not missing, age 8, no forms of mental abuse, physical abuse or neglect, sexual 
+# # abuse, or substance abuse, 2 referrals)
+# 
+# # Plotting predicted values
+# find_ologit3_plot <- ggplot(find_ologit3_pred, aes(x = race, y = mean, color=race)) +
+# geom_point(size=4) +
+# geom_pointrange(aes(ymin = lower, ymax=upper)) +
+# coord_flip() +
+# labs(title="Probability of Having a Finding by Race",
+# x="Race",
+# y="Probability",
+# color= "Race",
+# caption = "Note: error bars are 90% confidence intervals") +
+# scale_color_manual(values=colorviz3)
+# find_ologit3_plot
+
 ##MODEL: Ever Unsafe
 unsafe1 <- glm(ever_unsafe ~ race + gender + agemiss + age2,
                data=dss_screen_only, na.action=na.omit, family=binomial(link="logit"))
