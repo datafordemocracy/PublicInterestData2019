@@ -1,24 +1,26 @@
-### Kathryn Bernard, Carolyn Ours, Savannah Quick
-### Visualization Script - PIDL '19
-### April 26, 2019
 
-###### Kathryn ###### 
+######################################################################################
+# Public Interest Data Lab 
+# Foster Care: Visualizations
+# Updated: May 12, 2019
+######################################################################################
 
-### set working directory to encrypted volume
-#setwd("/Volumes/PIDL19")
+### create color palettes
+colorviz5 <- c("#384c7d","#755391","#b25590","#e35d7c","#fe785b")
+colorviz3 <- c("#b25590","#e35d7c","#fe785b")
+color_swap <- c("#fe785b", "#e35d7c", "#b25590")
 
 ### load packages
 library(tidyverse)
 library(lubridate)
 
-### read in data created in CSK_Cleaning.R
+## set working directory
+setwd("/Volumes/PIDL19/")
+
+### read in data created in fc_clean.R
 foster <- readRDS("foster_clean.rds")
 
-### create color palettes
-colorviz5 <- c("#384c7d","#755391","#b25590","#e35d7c","#fe785b")
-colorviz3 <- c("#b25590","#e35d7c","#fe785b")
-## reorder color palette
-color_swap <- c("#fe785b", "#e35d7c", "#b25590")
+######################################################################################
 
 ###### disability variable ###### 
 
@@ -26,7 +28,7 @@ color_swap <- c("#fe785b", "#e35d7c", "#b25590")
 
 ## total number of children of each race in foster care
 tot <- (foster %>% group_by(race) %>% count())$n 
-# white = 42, black = 91, multiracial = 45
+# white = 42, black = 91, MultiRace = 45
 
 ## general disability (any diagnosis)
 general <- foster %>% dplyr::group_by(race, child_disabled) %>% dplyr::count()
@@ -85,7 +87,7 @@ chisq.test(cbind(hear_diag, (tot-hear_diag)), correct=FALSE)
 hearp <- chisq.test(cbind(hear_diag, (tot-hear_diag)), correct=FALSE)$p.value
 
 ## df with all proportions
-race <- c('White','Black','Multiracial') 
+race <- c('White','Black','MultiRace') 
 dis_props <- as.data.frame(cbind(gen_prop,em_prop,med_prop,int_prop,phys_prop,hear_prop)) # concat all proportions
 rownames(dis_props) <- race # label by race
 
@@ -97,17 +99,7 @@ dis_long <- dis_long %>%
   mutate(distype = factor(distype)) %>%
   mutate(race = factor(race)) %>% 
   mutate(distype = fct_relevel(distype, "gen_prop", "em_prop", "med_prop", "int_prop", "phys_prop", "hear_prop")) %>% 
-  mutate(race = fct_relevel(race, "White", "Black", "Multiracial")) 
-
-## plot: star on axis label
-ggplot(dis_long, aes(x = distype, y = prop, fill = race)) +
-  geom_col(position = "dodge") +
-  scale_fill_manual(values=colorviz3, name='Race') +
-  labs(x="Type of Diagnosis",
-       y="Proportion of Children with Diagnosis",
-       title="Disability Diagnosis by Race",
-       caption="Note: * represents p value significant at .100,\n given by chi-squared test for indpendence") +
-  scale_x_discrete(labels=c("General", "Emotional *", "Medical", "Intellectual", "Physical", "Hearing"))
+  mutate(race = fct_relevel(race, "White", "Black", "MultiRace")) 
 
 ## plot: star + note on graph; space between general and rest of bars
 ggplot(dis_long, aes(x = distype, y = prop, fill = race)) +
@@ -138,6 +130,7 @@ ggplot(dis_long, aes(x=distype, y=prop, fill=race, alpha=distype)) +
   geom_segment(aes(x=2.1, y=.275, xend=3.2, yend=.275), linetype="solid", color="black")
 
 
+######################################################################################
 
 ###### discharge reason ###### 
 
@@ -188,7 +181,7 @@ discharged_race %>%
   geom_segment(x=3, y=.5, xend=3, yend=.43, linetype="solid", color="black")
 
 
-#### Savannah ####
+######################################################################################
 
 ###### case goals
 #Code to look at case goals
@@ -217,7 +210,7 @@ ggplot(cases, aes(x=race, fill=perm)) +
   geom_bar(position = 'fill') +          #creates bar graph
   labs(title='Case Goals by Race', x = 'Race', y='Proportion',    #adds labels
        fill='Case goal') +
-  scale_x_discrete(labels=c('White', 'Black', 'Multiracial')) +
+  scale_x_discrete(labels=c('White', 'Black', 'MultiRace')) +
   scale_fill_manual(values = colorviz5[c(1,3)]) +  #sets colors
   annotate("text", x=1, y = 0.97, label= (goal_tab[1]), color='white') +   #adds proportion labels
   annotate("text", x=1, y = (goal_tab[2]-0.05), label= (goal_tab[2]), color='white') +
@@ -251,9 +244,9 @@ ggplot(reasons, aes(x=perm_discharge)) +
   facet_wrap(.~perm)
 
 
-#####################################################
-#### Current Placement Setting (Carolyn)
-#####################################################
+######################################################################################
+
+#### Current Placement Setting 
 
 ## Data frame: filter by missing, relevel placement setting by most frequent 
 cps_by_race <- foster %>% 
@@ -275,8 +268,7 @@ place <- cps_by_race[cvars] %>%
 tot <- (foster %>% group_by(race) %>% count())$n 
 
 ## chi-squared test foster not kin 
-tbl <- table(cps_by_race$place_now, cps_by_race$race) %>% 
-  filter(cps_by_race$race %in% c("White", "Black", "MultiRace"))
+tbl <- table(cps_by_race$place_now, cps_by_race$race) 
 ffnktbl <- cbind(tbl["Foster family-not kin","Black"], tbl["Foster family-not kin","MultiRace"], tbl["Foster family-not kin","White"])
 chisq.test(ffnktbl)
 ffnkp <- chisq.test(ffnktbl)$p.value ## p = 0.01 
@@ -328,5 +320,156 @@ ggplot(place, aes(x=place_now, y = freq, fill=race, order = -as.numeric(race))) 
   annotate("text", x=6.8, y=.58, color='black', label=paste0(" * "), size=6) +
   geom_label(x=1.2, y=.42, label="Note: * represents significance \n at p < .100", label.size=.5,
              inherit.aes=FALSE)
+
+
+
+# ------------------------------- REMOVE REASONS -----------------------------------------
+# REMOVE SUM
+reg <- lm(remove_sum ~ race, data = foster)
+summary(reg)
+
+set.seed(19340)
+chisq.test(foster$remove_sum, foster$race, simulate.p.value = TRUE)  
+
+# reshape removal reasons to long
+var <- names(dss)[c(5, 100:114)]
+reason <- foster %>% 
+  dplyr::select(var, -c(remove_death, remove_alc, remove_sexabuse, remove_drug, remove_disable)) %>% 
+  gather(remove_physabuse:remove_house, key="why", value="response")
+
+# determine more common reasons
+tot <- reason %>% dplyr::group_by(why) %>% 
+  dplyr::summarise(sum=sum(response))
+reason <- left_join(reason, tot, by="why")
+
+# order by most common levels
+reason <- mutate(reason, why=factor(why, levels=unique(why[order(-sum,why)])))
+
+# generate p-values
+set.seed(19340)
+# remove_neglect
+chisq.test(foster$remove_neglect, foster$race, simulate.p.value = TRUE)  
+# remove_parent_drug
+chisq.test(foster$remove_parent_drug, foster$race, simulate.p.value = TRUE) 
+# remove_house
+chisq.test(foster$remove_house, foster$race, simulate.p.value = TRUE) 
+# remove_cope
+chisq.test(foster$remove_cope, foster$race, simulate.p.value = TRUE) 
+# remove_parent_alc ***  
+chisq.test(foster$remove_parent_alc, foster$race, simulate.p.value = TRUE) 
+# remove_behave
+chisq.test(foster$remove_behave, foster$race, simulate.p.value = TRUE) 
+# remove_physabuse *
+chisq.test(foster$remove_physabuse, foster$race, simulate.p.value = TRUE) 
+# remove_jail ** 
+chisq.test(foster$remove_jail, foster$race, simulate.p.value = TRUE) 
+# remove_relinq - 
+chisq.test(foster$remove_relinq, foster$race, simulate.p.value = TRUE) 
+# remove_abandon
+chisq.test(foster$remove_abandon, foster$race, simulate.p.value = TRUE) 
+
+# graph removal reasons
+colorviz3 <- c("#b25590","#e35d7c","#fe785b")
+
+ggplot(reason, aes(x=why, y=response, fill=race)) + 
+  stat_summary(fun.y="mean", geom="bar", position = "dodge") +
+  labs(title = "Reasons for Removal from Home", subtitle = "By Race", 
+       y = "Proportion", x = "Reason for Removal", 
+       caption=("Note: * represents p value significant at .100, \n given by chi-squared test for independence") ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_x_discrete(labels=c("Neglect", "Parent Drug Use", "Housing Quality", 
+                            "Inability to Cope", "* Parent Alcohol", "Behavior", 
+                            "* Physical Abuse", "* Jail", "Relinquishment", "Abandonment")) +
+  scale_fill_manual(values=colorviz3)
+
+# --------------------------------- REMOVE TYPE ------------------------------------------
+set.seed(19340)
+chisq.test(dss$removal_type, dss$race, simulate.p.value = TRUE) 
+
+# Nearly all children in the population are removed from the home by court-order 
+# (as opposed to voluntary) but there is an indicaton that race is slightly predictive 
+# in whether a child is removed (p = .1779).
+
+# ------------------------------ FINANCIAL SUPPORT ---------------------------------------
+# ANOVA for fc_monthly_pay
+pay_aov <- aov(fc_monthly_pay ~ race, data = dss)
+summary(pay_aov)
+
+# A statistically significant result (p = .0312) tells us that at least two of the means
+# differ. In other words, at least two of the groups (White, Black and multiracial) differ
+# significantly on the monthly foster care pay they receive.
+
+# Tukey HSD test
+TukeyHSD(pay_aov)
+# Black-White: p = .028
+# MultiRace-White: p = .106
+# MultiRace-Black: p = .967
+
+# This means that the Black and White groups differ significantly, but the multiracial 
+# and black groups do not. The difference between the multiracial and White group
+# approaches significance.
+
+
+# FINANCIAL SUPPORT TYPES
+
+# test p-values
+set.seed(19340)
+chisq.test(foster$get_afdc, foster$race, simulate.p.value = TRUE) # *
+chisq.test(foster$get_csupport, foster$race, simulate.p.value = TRUE) 
+chisq.test(foster$get_medicaid, foster$race, simulate.p.value = TRUE) 
+chisq.test(foster$get_ssi, foster$race, simulate.p.value = TRUE) 
+chisq.test(foster$get_support, foster$race, simulate.p.value = TRUE) 
+
+# reshape removal reasons to long
+var <- c(names(foster)[c(121:126)])
+foster[var] <- lapply(foster[var], function (x) {fct_recode(x,
+                                                              "1"="Yes",
+                                                              "0"="No")})
+foster[var] <- lapply(foster[var], function (x) {as.numeric(as.character(x))})
+
+financial <- foster %>%
+  dplyr::select(var, -c(get_adopt)) %>%
+  gather(get_afdc:get_support, key="why", value="response")
+
+# determine more common reasons
+financial$response <- as.numeric(financial$response)
+tot <- financial %>% dplyr::group_by(race, why) %>%
+  dplyr::summarise(sum = sum(response))
+financial <- left_join(financial, tot, by="why")
+
+# order by most common levels
+financial <- mutate(financial, why=factor(why, levels=unique(why[order(-sum,why)])))
+
+###
+# clean data
+dss_financial <- foster[c(5, 121:126)]
+dss_financial <- dplyr::select(dss_financial, -c(get_adopt))
+
+# aggregate data by proportions
+aggdata_mean <- aggregate(dss_financial[2:6], by=list(race = dss_financial$race), FUN=mean)
+means.long <- gather(aggdata_mean, get_afdc:get_support, key="support", value="prop")
+
+means.long$support <- factor(means.long$support)
+means.long <- mutate(means.long, 
+                     support=fct_recode(support, 
+                                        "AFDC"="get_afdc",
+                                        "Child Support"="get_csupport",
+                                        "Medicaid"="get_medicaid",
+                                        "SSI"="get_ssi",
+                                        "Any Form of Support"="get_support"), 
+                     support=fct_relevel(support, 
+                                         "Any Form of Support",
+                                         "Medicaid", "AFDC", "SSI", 
+                                         "Child Support")
+                     )
+
+# graph mean proportions
+ggplot(means.long, aes(x=support, y=prop, fill=race)) +
+  stat_summary(fun.y="sum", geom="bar", position="dodge") +
+  labs(title = "Financial Supports Received", subtitle = "By Race", 
+       y = "Proportion of Children Receiving Aid", x = "Receives Aid") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_manual(values=colorviz3) +
+  guides(fill=guide_legend(title="Race"))
 
 

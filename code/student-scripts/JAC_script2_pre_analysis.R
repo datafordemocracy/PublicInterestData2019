@@ -104,6 +104,8 @@ var <- c(names(dss_remove)[c(5, 121:126)])
 dss_remove[var] <- lapply(dss_remove[var], function (x) {fct_recode(x,
                                                                     "1"="Yes",
                                                                     "0"="No")})
+dss_remove[var] <- lapply(dss_remove[var], function (x) {as.numeric(as.character(x))})
+
 financial <- dss_remove %>%
   dplyr::select(var, -c(get_adopt)) %>%
   gather(get_afdc:get_support, key="why", value="response")
