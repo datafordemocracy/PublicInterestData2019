@@ -211,3 +211,32 @@ ggplot(fc, aes(x = foster_structure2, fill = race)) +
 prop.table(table(fc$race, fc$foster_structure2), margin = 2)  
 chisq.test(fc$foster_structure2, fc$race, simulate.p.value = TRUE)  
 
+
+# ..........................................................................................
+# 7. Reported maltreatment types: (not used in report)  -----
+
+# allegations by race
+# mental abluse
+ggplot(dss2, aes(x = race_ethn, fill = ment_ab)) + geom_bar(position = "fill")
+prop.table(table(dss2$race_ethn, dss2$ment_ab), margin = 1)
+chisq.test(dss2$ment_ab, dss2$race_ethn, simulate.p.value = TRUE)  
+
+# physical abuse
+ggplot(dss2, aes(x = race_ethn, fill = phys_ab)) + geom_bar(position = "fill")
+prop.table(table(dss2$race_ethn, dss2$phys_ab), margin = 1)
+chisq.test(dss2$phys_ab, dss2$race_ethn, simulate.p.value = TRUE)  
+
+# physical neglect
+ggplot(dss2, aes(x = race_ethn, fill = phys_neg)) + geom_bar(position = "fill")
+prop.table(table(dss2$race_ethn, dss2$phys_neg), margin = 1)
+chisq.test(dss2$phys_neg, dss2$race_ethn, simulate.p.value = TRUE)  
+
+# sexual abuse
+ggplot(dss2, aes(x = race_ethn, fill = sex_ab)) + geom_bar(position = "fill")
+prop.table(table(dss2$race_ethn, dss2$sex_ab), margin = 1)
+chisq.test(dss2$sex_ab, dss2$race_ethn, simulate.p.value = TRUE)  
+
+# substance exposed infant
+ggplot(dss2, aes(x = race_ethn, fill = substance_ex)) + geom_bar(position = "fill")
+prop.table(table(dss2$race_ethn, dss2$substance_ex), margin = 1)
+chisq.test(dss2$substance_ex, dss2$race_ethn, simulate.p.value = TRUE)  
