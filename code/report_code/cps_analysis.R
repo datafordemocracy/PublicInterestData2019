@@ -20,6 +20,7 @@ library(car)
 library(stargazer)
 library(glm.predict) 
 source("gen_qoi.R")
+source("gen_qoi_ol.R")
 
 # load data
 setwd("/Volumes/PIDL19")
@@ -70,7 +71,7 @@ ggplot(pred_count_ref, aes(x = fct_rev(group), y = outcome, color = group)) +
   labs(title="Predicted Number of Referrals by Race",
        x = "", color = "Race",
        y = "Predicted Number of Referrals",
-       caption = "Note: error bars are 90% credible intervals") + 
+       caption = "Note: error bars are 90% credible intervals") 
 ggsave("figures/pred_numref_race.pdf", width=9, height=6, units="in")   
 
 
@@ -89,7 +90,7 @@ stargazer(negbin1, negbin2,
 # ..........................................................................................
 # 4. Ever screened in, investigated, finding, unsafe ----
 
-# Ever screened in - all referrals
+# 4a. Ever screened in - all referrals
 # demographics
 screen1 <- glm(ever_screened ~ race_ethn + gender + agemiss + age2,
                data=dss2, family=binomial(link="logit"))
@@ -136,7 +137,7 @@ ggsave("figures/pred_screen_race.pdf", width=9, height=6, units="in")
 # screen3_pred
 
 
-# Ever Investigated - screened in referrals
+# 4b. Ever Investigated - screened in referrals
 dss3 <- dss2 %>% 
   filter(ever_screened == "Yes" & gender != "Unknown") 
 dss3$gender <- droplevels(dss3$gender)
@@ -187,7 +188,7 @@ ggsave("figures/pred_inv_race.pdf", width=9, height=6, units="in")
 # investigated1_pred
 
 
-# Ever a Finding - screened in and investigated referrals
+# 4c. Ever a Finding - screened in and investigated referrals
 dss4 <- dss3 %>% 
   filter(ever_inv2 == "Yes" & race_ethn != "Asian") 
 dss4$race_ethn <- droplevels(dss4$race_ethn)
@@ -196,19 +197,14 @@ dss4$race_ethn <- droplevels(dss4$race_ethn)
 find1 <- polr(ever_find ~ race_ethn + gender + agemiss + age2, 
               data = dss4, Hess = TRUE)
 summary(find1)
-
-find1.coef <- data.frame(coef(summary(find1)))
-find1.coef$pval = round((pnorm(abs(find1.coef$t.value), lower.tail = FALSE) * 2),2)
-find1.coef
+Anova(find1, type = 3)
 
 # demographics and alleged maltreatment
 find2 <- polr(ever_find ~ race_ethn + gender + agemiss + age2 + 
                 ment_ab + phys_ab + phys_neg + sex_ab, 
               data = dss4, Hess = TRUE)
 summary(find2)
-find2.coef <- data.frame(coef(summary(find2)))
-find2.coef$pval = round((pnorm(abs(find2.coef$t.value), lower.tail = FALSE) * 2),2)
-find2.coef
+Anova(find2, type = 3)
 
 # demographics, alleged maltreatment, and number of referrals
 find3 <- polr(ever_find ~ race_ethn + gender + agemiss + age2 + 
@@ -216,29 +212,50 @@ find3 <- polr(ever_find ~ race_ethn + gender + agemiss + age2 +
                 numref, 
               data = dss4, Hess = TRUE)
 summary(find3)
-find3.coef <- data.frame(coef(summary(find3)))
-find3.coef$pval = round((pnorm(abs(find3.coef$t.value), lower.tail = FALSE) * 2),2)
-find3.coef
+Anova(find3, type = 3)
 
+# generate average predictions
+# ideally this is part of function: gen_qui_ol
+race_ethn <- levels(factor(dss4[["race_ethn"]]))
+probmat <- sapply(race_ethn, FUN=function(x){
+  colMeans(predict(find3, type="probs", newdata=mutate(dss4, race_ethn=x)), na.rm=TRUE)
+})
+qoi <- data.frame(t(probmat))
+qoi <- mutate(qoi, race_ethn = rownames(qoi))
+qoi <- dplyr::select(qoi, race_ethn, everything()) # move group to the left
+qoi <- gather(qoi, -race_ethn, key = "QI", value = "point.estimate")  # reshape the data into a long format
 
-# Generating predicted proabilities by race: find_ologit3
-pred_prob_find <- predicts(find3, "F;F(2);0;8;0;0;1;0;2", sim.count = 1000, conf.int = 0.90, set.seed = 2238)
-pred_prob_find
+# use gen_qoi_ol function to generate se and bounds via simulation
+pred_prob_sim <- gen_qoi_ol(dss4, "race_ethn", find3)
 
- 
-# # Plot predicted probabilities
-ggplot(pred_prob_find, aes(x = race_ethn, y = mean, color = race_ethn)) +
-  geom_point(size = 4) + geom_pointrange(aes(ymin = lower, ymax = upper)) +
+# calculate the mean, standard deviation, 5th, and 95th percentiles
+# ideally this is also part of function: gen_qoi_ol
+pred_prob_sim <- pred_prob_sim %>% group_by(race_ethn, QI) %>% 
+  summarize(mean = mean(point.estimate),
+            se = sd(point.estimate),
+            lower = quantile(point.estimate, .05),
+            upper = quantile(point.estimate, .95))
+
+# add bounds and standard errors to point estimates (qoi)
+qoi <- full_join(qoi, pred_prob_sim)
+qoi <- qoi %>% 
+  mutate(race_ethn = fct_relevel(race_ethn, "White", "Black", "Multirace", "Hispanic"),
+         QI = fct_relevel(QI, "Find.High", "Find.Mod", "Find.Low", "No.Find"))
+
+# plot
+ggplot(qoi, aes(x = QI, y = point.estimate, color=race_ethn)) +
+  geom_point(size = 3, position = position_dodge(width = 0.3)) +
+  geom_linerange(aes(ymin = lower, ymax = upper), position = position_dodge(width = 0.3)) +
+  scale_color_manual(values=colorviz5_rev[1:4]) +
   labs(title = "Predicted Probability of Finding by Race", 
        x = "", color = "Race",
        y = "Predicted Probability of a Finding",
        caption = "Note: error bars are 90% credible intervals") + 
-  coord_flip() + facet_wrap(~ level) +  
-  scale_color_manual(values=colorviz5[2:5])
+  coord_flip() 
 ggsave("figures/pred_find_race.pdf", width=9, height=6, units="in")   
 
 
-# Ever Unsafe - screened in referrals
+# 4d. Ever Unsafe - screened in referrals
 # among all Asian and Hispanic children in screened in sample, no unsafe determinations
 # model perfectly predicts these; try without
 # similarly, all children with missing age are never unsafe
@@ -430,5 +447,3 @@ stargazer(remove1b, remove2b, remove3b, remove4b,
           dep.var.caption = "", omit.stat = "theta",
           type = "latex", star.cutoffs = c(0.20, 0.1, 0.05),
           column.sep.width="1pt", align=TRUE, no.space=TRUE, dep.var.labels.include=FALSE)
-
-
